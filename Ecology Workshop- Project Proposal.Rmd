@@ -1,0 +1,15 @@
+---
+title: 'Ecology Workshop: Project Proposal'
+author: "Helen Wagner"
+date: "1/10/2020"
+output: html_document
+---
+# Research Statement
+I am a Graduate Student in the Department of Biological Sciences at Florida International University. I work in Dr. Matthew DeGennaro's Laboratory of Tropical Genetics where my primary research focus is to improve our understanding of how insecticide spraying and other environmental factors influence spatial variability in _Aedes aegypti_ mosquito population structure and behavior. Using spatial models I will explore questions related to vector ecology, population expansion, and genetic susceptibility to varying environmental conditions.
+<http://www.degennarolab.org/helen-wagner>
+
+# Objectives and hypothesis
+The primary objective of my project is to evaluate spatial differences on insecticide resistance in _Ae. aegypti_ mosquitoes throughout South Florida, with a focus on Miami-Dade County. Understanding variation in population structures is challenging due to the variety of factors influencing the system. One of the most important factors being anthropogenic barriers to _Ae. aegypti_ dispersal. I hypothesize the dispertion potential at the population scale is influenced by anthropogenic environmental manipulations, which may perform as significant barriers to the migration of _Ae. aegypti_ and other insects. In urban environments, when anthropogenic landscape features result in habitat fragmentation, influencing the dispersal patterns of mosquitoes. When found on oposing sides of these barriers, the flow of genes conditioning vector competence and insecticide resistance should enforce the establishment of varying allele frequency.
+
+# Methods (Dataset and Statistical Analysis)
+I will evaluate changes in the genomic variance and circadian rhythm behavior variance of _Ae. aegypti_ mosquitoes using data collected from students through our long-term FLAGG Mosquito Research Internship, Miami-Dade Open Data Hub research site, and American Factfinder research site.  Here, students participating in our internship use Survey123 on Arcgis to collect spatial data on location of the introduced oviposition sites. Other environmental data is obtained through both research sites which make their data available to the public. I will download the most currently available datasets to view hydrography, highways and ports, and insecticide spraying, and will then cross-reference this data to the data collected from genomic and circadian rhythm experiments to analyze environmental conditions and dispersal patterns when anthropogenic barriers are present.
