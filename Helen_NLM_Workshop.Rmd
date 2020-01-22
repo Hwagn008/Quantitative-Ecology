@@ -12,7 +12,7 @@ output: html_document
 
 ## Site Information 
 
-![Field sites representing major climate and ecological biomes, including tundra, grasslands, savanna, crops, and conifer, deciduous, and tropical forests](~/Documents/GitHub/Quantitative-Ecology/NMBWorkshop/Figures/ameriflux-custom-map.png)
+![Field sites representing major climate and ecological biomes, including tundra, grasslands, savanna, crops, and conifer, deciduous, and tropical forests](ameriflux-custom-map.png)
 
 ## Starting Values for Nonlinear Models:
 
@@ -48,6 +48,12 @@ SS.trc <- selfStart(model=trcModel,initial= trc.int)
 iv <- getInitial(NEE ~ SS.trc('TA', "a", "b"), data = night[which(night$MONTH == j),])
 iv
 
+$a
+[1] 1.451937
+
+$b
+[1] 0.043954
+
 ### Use initial values in the model
 
 y = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == j),], start=list(a= iv$a , b= iv$b),
@@ -58,9 +64,12 @@ summary(y)
 ### Converged model assumptions check, confidence intervals and plots
 res.trc <- nlsResiduals(y)
 par(mfrow=c(2,2))
-plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
 plot(res.trc, which=4) # Autocorrelation
 plot(res.trc, which=5) # Histogram (Normality)
+
+![Visual assessment of the model assumptions](SelfStart_ModelAssumptions.png)
 
 ### Bootstrap to estimate errors for the parameters by resampling the data
 results <- nlsBoot(y, niter=100 )
@@ -68,7 +77,7 @@ summary(results)
 
 plot(results, type = "boxplot")
 
-
+![Boxplot of bootstrap estimates and standard errors together with the median and percentiles confidence intervals](NMBSelfstart_Bootstrap_EE.png)
 
 # How variable are NEE rates over an annual cycle in Harvard Forest?
 ### Fitting temperature response curves monthly and comparing parameter values:
