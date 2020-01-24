@@ -94,14 +94,54 @@ Now let’s fit a model. The forecast package allows the user to explicitly spec
 
 arima.nee1 <-auto.arima(nee, trace=TRUE)
 
+```{r}
+# ARIMA(2,1,3)(2,0,2)[30]                    : 706.7137
+
+# Best: ARIMA(2,1,3)(2,0,2)[30]   
+```
+
 tsdisplay(residuals(arima.nee1), lag.max=45)
+
+![NEE1residuals](NEE1residuals.png)
 
 arima.nee2 <-arima(nee , order=c(10,1,3), seasonal= list(order=c(2,0,2)))
 
+```{r}
+# Warning message:
+# In arima(nee, order = c(10, 1, 3), seasonal = list(order = c(2,  :
+  #possible convergence problem: optim gave code = 1  
+```
+
 tsdisplay(residuals(arima.nee2), lag.max= 30)
+![NEE2residuals](NEE2residuals.png)
 
 ##### You want to minimize AIC
 AIC(arima.nee1, arima.nee2)
+
+kable(AIC(arima.nee1,arima.nee2 ), format = "html", digits = 1) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> df </th>
+   <th style="text-align:right;"> AIC </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> arima.nee1 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 706.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> arima.nee2 </td>
+   <td style="text-align:right;"> 18 </td>
+   <td style="text-align:right;"> 704.8 </td>
+  </tr>
+</tbody>
+</table>
 
 par(mfrow=c(1,1))
 plot(nee , typ="l"); lines(fitted(arima.nee2),col="red")
@@ -114,6 +154,8 @@ par(mfrow=c(1,1))
 plot(nee , typ="l"); lines(fitted(arima.nee2),col="red")
 
 plot(forecast(arima.nee2, h=30))
+
+![NEE2fitted](NEE2fitted.png)
 
 ## Using water.tmax to develop a better model:
 
@@ -132,10 +174,14 @@ irregularities.
 par(mfrow=c(1,1), mai=c(1.25,0.8,0.1, 0.1))
 plot( wat, typ="l", ylab= "WaterTemp", xlab="")
 
+![watVisual](watVisual.png)
+
 You want to remove any outliers that could bias the model by skewing statistical summaries. R provides a convenient method for removing time series outliers: tsclean() as part of its forecast package. tsclean() identifies and replaces outliers using series smoothing and decomposition.
 
 plot(wat, typ="l", ylab= "WaterTemp", xlab="")
 lines(tsclean(wat), col="red")
+
+![watOutliers](watOutliers.png)
 
 wat <- tsclean(wat)
 
@@ -148,6 +194,8 @@ The part of the series that can’t be attributed to the seasonal or trend compo
 wat.d <- decompose(wat, 'multiplicative')
 plot(wat.d)
 
+![watDecomp](watDecomp.png)
+
 #### 3. Test for stationarity
 Fitting an ARIMA model requires the series to be stationary. A series is stationary when its mean, variance, and autocovariance are time invariant. This assumption makes intuitive sense: Since ARIMA uses previous lags of series to model its behavior, modeling stable series with consistent properties involves less uncertainty. The augmented Dickey-Fuller (ADF) test is a formal statistical test for stationarity. The null hypothesis assumes that the series is non-stationary. ADF procedure tests whether the change in Y can be explained by
 lagged value and a linear trend. If contribution of the lagged value to the change in Y is non-significant and there is a presence of a trend component, the series is non-stationary and null hypothesis will not be rejected.
@@ -155,15 +203,40 @@ lagged value and a linear trend. If contribution of the lagged value to the chan
 ###### p-value < 0.05 indicates the TS is stationary
 adf.test(wat)
 
+```{r}
+#Augmented Dickey-Fuller Test
+
+#data:  wat
+#Dickey-Fuller = -2.1936, Lag order = 7, p-value = 0.4952
+#alternative hypothesis: stationary
+
+```
+
 adf.test(diff(wat))
+
+```{r}
+#Augmented Dickey-Fuller Test
+
+#data:  diff(wat)
+#Dickey-Fuller = -9.4432, Lag order = 7, p-value = 0.01
+#alternative hypothesis: stationary
+```
 
 #### 4. Explore correlations.
 Look for significant lags.
 
 ccf( diff(wat),nee, na.action = na.pass, lag.max=40, plot=TRUE)
 
+![watLags](watLags.png)
+
 #### 5. Explore Models of NEE.
 arima.nee3 <-auto.arima(nee, xreg=c(diff(wat),0), trace=TRUE)
+
+```{r}
+#ARIMA(3,1,1)(2,0,1)[30]                    : 698.1553
+
+# Best model: Regression with ARIMA(3,1,1)(2,0,1)[30] errors 
+```
 
 ##### Compare to current model
 AIC(arima.nee2, arima.nee3 )
@@ -171,26 +244,85 @@ AIC(arima.nee2, arima.nee3 )
 kable(AIC(arima.nee2,arima.nee3 ), format = "html", digits = 1) %>%
   kable_styling(bootstrap_options = "striped", full_width = F)
 
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> df </th>
+   <th style="text-align:right;"> AIC </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> arima.nee2 </td>
+   <td style="text-align:right;"> 18 </td>
+   <td style="text-align:right;"> 704.8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> arima.nee3 </td>
+   <td style="text-align:right;"> 9 </td>
+   <td style="text-align:right;"> 697.6 </td>
+  </tr>
+</tbody>
+</table>
+
 par(mfrow=c(1,1))
 plot(nee , typ="l"); lines(fitted(arima.nee3),col="red")
+
+![NEE3fitted](NEE3fitted.png)
+
+So, adding water temperature to nee did improve the model. Maybe extreme water temperature is more important. Lets create a water temperature index to ID when water temperature values are greater than 25n ppt.
 
 wat.i <- wat
 wat.i[wat.i < 25 ]<- 0
 wat.i[wat.i >= 25 ]<- 1
 plot(wat.i)
 
+![wat25over](wat25over.png)
+
 arima.nee4 <-auto.arima(nee, xreg=wat.i, trace=TRUE)
 
+```{r}
+#ARIMA(0,1,3)(2,0,1)[30]                    : 692.1087
+
+# Best model: Regression with ARIMA(0,1,3)(2,0,1)[30] errors 
+```
 
 AIC(arima.nee2,arima.nee4 )
 
 kable(AIC(arima.nee2,arima.nee4 ), format = "html", digits = 1) %>%
   kable_styling(bootstrap_options = "striped", full_width = F)
+  
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> df </th>
+   <th style="text-align:right;"> AIC </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> arima.nee2 </td>
+   <td style="text-align:right;"> 18 </td>
+   <td style="text-align:right;"> 704.8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> arima.nee4 </td>
+   <td style="text-align:right;"> 8 </td>
+   <td style="text-align:right;"> 691.7 </td>
+  </tr>
+</tbody>
+</table>
 
 checkresiduals(arima.nee4, lag=36)
 
+![NEE4residuals](NEE4residuals.png)
+
 par(mfrow=c(1,1))
 plot(nee , typ="l"); lines(fitted(arima.nee4),col="red")
+
+![NEE4fitted](NEE4fitted.png)
 
 ## Site Information 
 
