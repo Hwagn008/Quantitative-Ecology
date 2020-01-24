@@ -12,9 +12,20 @@ output: html_document
 
 ##### The harv dataframe includes flux data downloaded from Ameriflux (https://ameriflux.lbl.gov) for the Harvard Forest tower (Ha1). The only behind the scenes processing includes formating the timestamp and including year, and month. The harv dataset was then divided into two files: day (PAR > 0) and night (PAR == 0). In this assignment, the monthly temperature response curves is fitted using a similar approach with the night data from harv (night).
 
-![Field sites representing major climate and ecological biomes, including tundra, grasslands, savanna, crops, and conifer, deciduous, and tropical forests](ameriflux-custom-map.png)
+## Study Site: Harvard Forest
 
-## Starting Values for Nonlinear Models:
+Location: Massachusetts 
+
+Climate: Cool, moist temperate July mean temperature 20°C January mean temperature -7°C; Annual mean precipitation 110 cm, distributed fairly evenly throughout the year
+
+Vegetation: Transition Hardwood - White Pine - Hemlock Region
+
+Dominant species: Red oak (Quercus rubra) Red maple (Acer rubrum) Black birch (Betula lenta) White pine (Pinus strobus) Eastern hemlock (Tsuga canadensis)
+
+#### Environmental Measurement Station Eddy Flux Tower (EMS)
+
+![HarvardForestSite](HarvardForestSite.png)
+
 
 #### Download necessary tools
 library(nlstools)
@@ -45,6 +56,8 @@ plot( NEE ~ TA, data= night)
 Figure 2. Net Ecosystem Exchange Rates relative to ecosystem respiration temperature sensitivity at Harvard forest from 1990 to 2016.
 
 The temperature response curve model includes two parameters: a  is the base respiration rate when air temperature is 0 C and b  is an empirical coefficient. We can use the nls() estimator for the estimation of the parameters by specifying the model, data set, and starting values for the parameters.
+
+## Starting Values for Nonlinear Models:
 
 ### Selfstart for the trc:
 
@@ -339,7 +352,7 @@ plot(res.trc, which=5) # Histogram (Normality)
 
 
 
-# How variable are NEE rates over a monthly cycle in Harvard Forest?
+# How variable are NEE rates over an annual cycle in Harvard Forest?
 Harvard Forest is a mixed temperate forest. We want to quantify just how variable rates of NEE are monthly. To do this we will fit temperature response curves monthly and compare parameter values.
 
 ##Workflow:
@@ -407,7 +420,8 @@ y4 <- try(nee.night(night[which(night$MONTH == j),]), silent=T) # Fit night mode
 }, silent=T)
 
 parms.Month
- 
+
+summary(parms.Month) 
 
 ### Creating a table for the parms.Month results
 
@@ -476,7 +490,104 @@ for ( j in unique(boot.NEE$MONTH)){
 trc <- merge( parms.Month, boot.NEE)
 
 trc
- 
+
+summary(trc)
+
+library("papeR")
+kable(summary(trc), format = "html", digits = 1)%>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:left;">     MONTH </th>
+   <th style="text-align:left;">       a </th>
+   <th style="text-align:left;">       b </th>
+   <th style="text-align:left;">    a.pvalue </th>
+   <th style="text-align:left;">    b.pvalue </th>
+   <th style="text-align:left;">     a.est </th>
+   <th style="text-align:left;">     b.est </th>
+   <th style="text-align:left;">      a.se </th>
+   <th style="text-align:left;">      b.se </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Min.   : 1.00 </td>
+   <td style="text-align:left;"> Min.   :1.101 </td>
+   <td style="text-align:left;"> Min.   :-0.01423 </td>
+   <td style="text-align:left;"> Min.   :0.000e+00 </td>
+   <td style="text-align:left;"> Min.   :0.000000 </td>
+   <td style="text-align:left;"> Min.   :1.101 </td>
+   <td style="text-align:left;"> Min.   :-0.01416 </td>
+   <td style="text-align:left;"> Min.   :0.02510 </td>
+   <td style="text-align:left;"> Min.   :0.003356 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> 1st Qu.: 3.75 </td>
+   <td style="text-align:left;"> 1st Qu.:1.279 </td>
+   <td style="text-align:left;"> 1st Qu.: 0.03380 </td>
+   <td style="text-align:left;"> 1st Qu.:0.000e+00 </td>
+   <td style="text-align:left;"> 1st Qu.:0.000000 </td>
+   <td style="text-align:left;"> 1st Qu.:1.275 </td>
+   <td style="text-align:left;"> 1st Qu.: 0.03415 </td>
+   <td style="text-align:left;"> 1st Qu.:0.04410 </td>
+   <td style="text-align:left;"> 1st Qu.:0.004018 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Median : 6.50 </td>
+   <td style="text-align:left;"> Median :1.677 </td>
+   <td style="text-align:left;"> Median : 0.03860 </td>
+   <td style="text-align:left;"> Median :0.000e+00 </td>
+   <td style="text-align:left;"> Median :0.000000 </td>
+   <td style="text-align:left;"> Median :1.677 </td>
+   <td style="text-align:left;"> Median : 0.03876 </td>
+   <td style="text-align:left;"> Median :0.07721 </td>
+   <td style="text-align:left;"> Median :0.004720 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Mean   : 6.50 </td>
+   <td style="text-align:left;"> Mean   :1.889 </td>
+   <td style="text-align:left;"> Mean   : 0.03640 </td>
+   <td style="text-align:left;"> Mean   :3.748e-11 </td>
+   <td style="text-align:left;"> Mean   :0.008777 </td>
+   <td style="text-align:left;"> Mean   :1.904 </td>
+   <td style="text-align:left;"> Mean   : 0.03641 </td>
+   <td style="text-align:left;"> Mean   :0.18969 </td>
+   <td style="text-align:left;"> Mean   :0.005568 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> 3rd Qu.: 9.25 </td>
+   <td style="text-align:left;"> 3rd Qu.:1.867 </td>
+   <td style="text-align:left;"> 3rd Qu.: 0.04601 </td>
+   <td style="text-align:left;"> 3rd Qu.:0.000e+00 </td>
+   <td style="text-align:left;"> 3rd Qu.:0.000000 </td>
+   <td style="text-align:left;"> 3rd Qu.:1.878 </td>
+   <td style="text-align:left;"> 3rd Qu.: 0.04541 </td>
+   <td style="text-align:left;"> 3rd Qu.:0.23695 </td>
+   <td style="text-align:left;"> 3rd Qu.:0.007198 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Max.   :12.00 </td>
+   <td style="text-align:left;"> Max.   :4.799 </td>
+   <td style="text-align:left;"> Max.   : 0.05711 </td>
+   <td style="text-align:left;"> Max.   :4.284e-10 </td>
+   <td style="text-align:left;"> Max.   :0.105324 </td>
+   <td style="text-align:left;"> Max.   :4.906 </td>
+   <td style="text-align:left;"> Max.   : 0.05714 </td>
+   <td style="text-align:left;"> Max.   :1.00424 </td>
+   <td style="text-align:left;"> Max.   :0.010848 </td>
+  </tr>
+</tbody>
+</table>
+
 
 # Results
 
@@ -613,6 +724,6 @@ The table above shows the parms.Month results. As can be seen, as a result of hi
 
 First, the photosynthetic potential is discussed. Photosynthetically Active Radiation is needed for photosynthesis and plant growth. Higher PAR promotes plant growth, and monitoring monitoring PAR is important to ensure plants are receiving adequate light for this process. PAR values range from 0 to 3,000 millimoles per square meter. At night, however, PAR is zero. This was illustrated in figure 1.
 
-In terms of ecosystem respiration, in the summary of the use initial values in the model, there is no termination occurring before convergence upon completion of maximum iterations, in the case of a singular gradient, and in the case that the step-size factor is reduced below a minimum factor. The starting values are not an issue here.
+In terms of ecosystem respiration, The TA, as it rose, came with higher variance in Net Ecosystem Exchange Rates. When TA fell below 0, NEE was maintained at an average of 0, but when the TA range was 15-25, the NEE varied from -20 to 20. This may be because the rate of respiration in a plant cell decreases when temperature decreases until respiration nearly or completely halts around freezing temperatures. Also, respiration increases with increasing temperatures until very high temperatures are reached and result in tissue deterioration, possibly causing the high NEE variance we see as the TA reachest the highest observed levels. In the summary of the use initial values in the model, there is no termination occurring before convergence upon completion of maximum iterations, in the case of a singular gradient, and in the case that the step-size factor is reduced below a minimum factor. The starting values are not an issue here.
 
-In terms of final analysis, months 5-9 seem to have the highest a values in the parms.Month results after bootstrapping. a standing for base respiration rate when air temperature is 0 C. Months 5-9 or May through September seem to correlate with summer months, meaning that respiration may be higher in summer than Winter or Spring. The high a value seems to indicate the growing season, where month 8 is twice as high as the second highest a value, signifying that this month may be when there is highest base respiration rate occurring. Since carbon dioxide is used up during the photosynthesis, and oxygen produced, the rate of photosynthesis can be measured directly, by measuring either the production of oxygen or the uptake of carbon dioxide.
+In terms of final analysis, the selfstart value "a" = 1.451937 seemed to be close in range with non-summer months (1-4, and 10-12), while "b" = 0.043954 seemed to stay similar for most months except fot August.  Months 5-9 seem to have the highest "a" values in the parms.Month results. the variable "a" standing for base respiration rate when air temperature is 0 C. Months 5-9 or May through September seem to correlate with summer months, meaning that respiration may be higher in summer than Winter or Spring. This makes sense since temperature greatly affects respiration for maintenance (much more than cells dedicated to plant growth). Plants in temperate climates have much lower respiration rates in winter than during warm summers. The high a value seems to indicate the growing season, where month 8 is twice as high as the second highest a value, signifying that this month may be when there is highest base respiration rate occurring. Because we analyzed night data, during this time, only respiration takes place. Oxygen is consumed while carbon dioxide is released. Since an increase in available sugars from photosynthesis generally leads to an increased rate of respiration, it is likely that during the daytime, photosynthetic potential is highest during the same months that respiration is highest, in the summer months.

@@ -1,0 +1,7 @@
+﻿     MONTH   ,a,B,    a.pvalue      ,          b.pvalue, a.est  ,     b.est     ,a.se   ,b.se      
+ Min.   : 1.00  ,Min.   :1.101  , Min.   :-0.01423  , Min.   :0.000e+00  ,Min.   :0.000000  ,Min.   :1.101  , Min.   :-0.01416  ,Min.   :0.02510 , Min.   :0.003356  
+ 1st Qu.: 3.75   ,1st Qu.:1.279  , 1st Qu.: 0.03380  , 1st Qu.:0.000e+00  ,1st Qu.:0.000000  ,1st Qu.:1.275  , 1st Qu.: 0.03415    ,1st Qu.:0.04410 , 1st Qu.:0.004018
+ Median : 6.50  , Median :1.677   ,Median : 0.03860  , Median :0.000e+00  ,Median :0.000000   ,Median :1.677  , Median : 0.03876    ,Median :0.07721  ,Median :0.004720
+ Mean   : 6.50   ,Mean   :1.889   ,Mean   : 0.03640  , Mean   :3.748e-11   ,Mean   :0.008777 ,  Mean   :1.904  , Mean   : 0.03641  ,Mean   :0.18969  ,Mean   :0.005568  
+ 3rd Qu.: 9.25   ,3rd Qu.:1.867   ,3rd Qu.: 0.04601  , 3rd Qu.:0.000e+00   ,3rd Qu.:0.000000 ,  3rd Qu.:1.878  , 3rd Qu.: 0.04541    ,3rd Qu.:0.23695   ,3rd Qu.:0.007198 
+ Max.   :12.00  ,Max.   :4.799 ,  Max.   : 0.05711  , Max.   :4.284e-10  ,Max.   :0.105324  ,Max.   :4.906  , Max.   : 0.05714    ,Max.   :1.00424   ,Max.   :0.010848
