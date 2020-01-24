@@ -13,7 +13,28 @@ knitr::opts_chunk$set(echo = TRUE)
 # Objectives
 The primary objectives of this analysis is ...
 
+1 Plot, examine, and prepare time series for modeling
+
+2 Extract the seasonality component from the time series
+
+3 Test for stationarity and apply appropriate transformations
+
+4 Choose the order of an ARIMA model
+
+
 # Methods
+
+## Site Information 
+
+The data provided in ARIMA_Workshop includes one data set of daily rates of NEE for a tower site in a mangrove scrub (mangroves) along the coast of Florida. The dataset includes gap-filled NEE (g C m2 day−1). Data was obtained from an eddy covariance tower in Everglades National Park at the Florida Coastal Everglades Long-term Ecological Research site TS/Ph-7. Data includes NEE (g C m2 day−1), total daily PAR (par; W m−2 day−1), air temperature (tair; C), water temperature minimum and maximum, (water.tmax and water.min; C), and water salinity minimum, maximum, and mean (salinity.min, salinity.max, salinity.mean; ppt).
+
+In this report, there is a focus on NEE (g C m2 day−1), and water temperature maximum, (water.tmax; C).
+
+![MangroveTSPH7](MangroveTSPH7.png)
+![MangroveTSPH7](MangroveTSPH7_2.png)
+![MangroveTSPH7](MangroveTSPH7_3.png)
+
+## Statistical Analysis
 
 load("/Users/helen/Documents/EcologyRWorkshop/Time_Series_Analysis/Github/ARIMA_Workshop.RData")
 
@@ -323,10 +344,6 @@ par(mfrow=c(1,1))
 plot(nee , typ="l"); lines(fitted(arima.nee4),col="red")
 
 ![NEE4fitted](NEE4fitted.png)
-
-## Site Information 
-
-## Statistical Analysis
 
 # Results (minimum of 1 plot and one table)
 
