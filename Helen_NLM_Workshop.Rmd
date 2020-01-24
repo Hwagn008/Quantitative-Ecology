@@ -41,7 +41,8 @@ Figure 1 Net Ecosystem Exchange Rates relative to photosynthetically active radi
 plot( NEE ~ TA, data= night)
 
 ![Scatterplot for Night](Scatterplot_Night.png)
-Figure 1. Net Ecosystem Exchange Rates relative to ecosystem respiration temperature sensitivity at Harvard forest from 1990 to 2016.
+
+Figure 2. Net Ecosystem Exchange Rates relative to ecosystem respiration temperature sensitivity at Harvard forest from 1990 to 2016.
 
 The temperature response curve model includes two parameters: a  is the base respiration rate when air temperature is 0 C and b  is an empirical coefficient. We can use the nls() estimator for the estimation of the parameters by specifying the model, data set, and starting values for the parameters.
 
@@ -610,3 +611,8 @@ The table above shows the parms.Month results. As can be seen, as a result of hi
 
 # Discussion
 
+First, the photosynthetic potential is discussed. Photosynthetically Active Radiation is needed for photosynthesis and plant growth. Higher PAR promotes plant growth, and monitoring monitoring PAR is important to ensure plants are receiving adequate light for this process. PAR values range from 0 to 3,000 millimoles per square meter. At night, however, PAR is zero. This was illustrated in figure 1.
+
+In terms of ecosystem respiration, in the summary of the use initial values in the model, there is no termination occurring before convergence upon completion of maximum iterations, in the case of a singular gradient, and in the case that the step-size factor is reduced below a minimum factor. The starting values are not an issue here.
+
+In terms of final analysis, months 5-9 seem to have the highest a values in the parms.Month results after bootstrapping. a standing for base respiration rate when air temperature is 0 C. Months 5-9 or May through September seem to correlate with summer months, meaning that respiration may be higher in summer than Winter or Spring. The high a value seems to indicate the growing season, where month 8 is twice as high as the second highest a value, signifying that this month may be when there is highest base respiration rate occurring. Since carbon dioxide is used up during the photosynthesis, and oxygen produced, the rate of photosynthesis can be measured directly, by measuring either the production of oxygen or the uptake of carbon dioxide.
