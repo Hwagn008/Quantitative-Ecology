@@ -5,12 +5,12 @@ date: "1/21/2020"
 output: html_document
 ---
 
-##### The harv dataframe includes flux data downloaded from Ameriflux (https://ameriflux.lbl.gov) for the Harvard Forest tower (Ha1). The only behind the scenes processing includes formating the timestamp and including year, and month. The harv dataset was then divided into two files: day (PAR > 0) and night (PAR == 0). In this assignment, the monthly temperature response curves is fitted using a similar approach with the night data from harv (night).
-
 
 # Methods
 
-## Site Information 
+# Site Information 
+
+##### The harv dataframe includes flux data downloaded from Ameriflux (https://ameriflux.lbl.gov) for the Harvard Forest tower (Ha1). The only behind the scenes processing includes formating the timestamp and including year, and month. The harv dataset was then divided into two files: day (PAR > 0) and night (PAR == 0). In this assignment, the monthly temperature response curves is fitted using a similar approach with the night data from harv (night).
 
 ![Field sites representing major climate and ecological biomes, including tundra, grasslands, savanna, crops, and conifer, deciduous, and tropical forests](ameriflux-custom-map.png)
 
@@ -22,13 +22,42 @@ library(nlstools)
 #### Set your working directory
 load("~/Desktop/QEco/NLM_Workshop.RData")
 
+# Photosynthetic Potential
+
+### Fitting Light Response Curves With nls():
+To measure the relationship between photosynthetically active radiation (PAR; 400 - 700 nm) and net ecosystem exchange (NEE), we can fit a light response curve. Both TA and NEE are in μmol m^-2 s^-1.
+
+The first step in fitting a nonlinear model is to take a look at the data.
+
+plot( NEE ~ PAR, data= night)
+
+![photosynthetically active radiation](photosynthetically active radiation.png)
+
+Figure 1 Net Ecosystem Exchange Rates relative to photosynthetically active radiation at Harvard forest from 1990 to 2016.
+
+# Ecosystem Respiration
+
+### Fitting temperature responce curves with nls():
+plot( NEE ~ TA, data= night)
+
+![Scatterplot for Night](Scatterplot_Night.png)
+Figure 1. Net Ecosystem Exchange Rates relative to ecosystem respiration temperature sensitivity at Harvard forest from 1990 to 2016.
+
+The temperature response curve model includes two parameters: a  is the base respiration rate when air temperature is 0 C and b  is an empirical coefficient. We can use the nls() estimator for the estimation of the parameters by specifying the model, data set, and starting values for the parameters.
+
 ### Selfstart for the trc:
+
+To reduce the bias introduced by the selection of starting values we can use selfStart to construct self-starting nonlinear models.
+
+
 trcModel <- function(TA, a, b) {
   y=a * exp(b*TA)
   return(y)
 }
 
 ### Create a function to find initial values for the selfstart function:
+
+
 trc.int <- function (mCall, LHS, data){
   x <- data$TA
   y <- data$NEE
@@ -41,12 +70,20 @@ trc.int <- function (mCall, LHS, data){
   return(value)
 }
 
+
 ### Selfstart Function
+
+
 SS.trc <- selfStart(model=trcModel,initial= trc.int)
 
+
 ### Find initial values
-iv <- getInitial(NEE ~ SS.trc('TA', "a", "b"), data = night[which(night$MONTH == j),])
+
+
+iv <- getInitial(NEE ~ SS.trc('TA', "a", "b"), 
+                 data = night[which(night$MONTH == j),])
 iv
+
 
 $a
 [1] 1.451937
@@ -56,12 +93,17 @@ $b
 
 ### Use initial values in the model
 
+
 y = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == j),], start=list(a= iv$a , b= iv$b),
 na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
 summary(y)
 
+![Summary of the use initial values in the model](Summary of the use initial values in the model.png)
+
 
 ### Converged model assumptions check, confidence intervals and plots
+
+
 res.trc <- nlsResiduals(y)
 par(mfrow=c(2,2))
 plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
@@ -69,20 +111,246 @@ plot(res.trc, which=3) # Standardized residuals
 plot(res.trc, which=4) # Autocorrelation
 plot(res.trc, which=5) # Histogram (Normality)
 
+
+
 ![Visual assessment of the model assumptions](SelfStart_ModelAssumptions.png)
 
-### Bootstrap to estimate errors for the parameters by resampling the data
+
+
+### Bootstrap to estimate errors for the parameters by resampling the data\
+
+We can bootstrap to estimate errors for the parameters by resampling the data. The function nlsBoot() uses non-parametric bootstrap of mean centered residuals to obtain a number (niter) of bootstrap estimates. Bootstrap estimates and standard errors together with the median and percentiles confidence intervals are displayed by the summary(). The nlsBoot() provides confidence intervals even if the optimization algorithm fails to converge for some of the bootstrapped samples.
+
+
 results <- nlsBoot(y, niter=100 )
 summary(results)
 
 plot(results, type = "boxplot")
 
+
 ![Boxplot of bootstrap estimates and standard errors together with the median and percentiles confidence intervals](NMBSelfstart_Bootstrap_EE.png)
 
-# How variable are NEE rates over an annual cycle in Harvard Forest?
-### Fitting temperature response curves monthly and comparing parameter values:
+### First month
+
+
+m1 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 1),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m1)
+
+res.trc <- nlsResiduals(m1)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+
+
+![Month1BootstapPlot](Month1BootstapPlot.png)
+
+### Second month
+
+
+m2 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 2),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m2)
+
+res.trc <- nlsResiduals(m2)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+
+
+![Month2BootstapPlot](Month2BootstapPlot.png)
+
+### Third month
+
+
+m3 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 3),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m3)
+
+res.trc <- nlsResiduals(m3)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+
+
+![Month3BootstapPlot](Month3BootstapPlot.png)
+
+### Fourth month
+
+
+m4 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 4),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m4)
+
+res.trc <- nlsResiduals(m4)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+ 
+
+![Month4BootstapPlot](Month4BootstapPlot.png)
+
+### Fifth month
+
+
+m5 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 5),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m5)
+
+res.trc <- nlsResiduals(m5)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+ 
+
+![Month5BootstapPlot](Month5BootstapPlot.png)
+
+### Sixth month
+
+
+m6 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 6),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m6)
+
+res.trc <- nlsResiduals(m6)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+
+
+![Month6BootstapPlot](Month6BootstapPlot.png)
+
+### Seventh month
+
+
+m7 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 7),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m7)
+
+res.trc <- nlsResiduals(m7)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+ 
+
+![Month7BootstapPlot](Month7BootstapPlot.png)
+
+### Eigth month
+
+
+m8 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 8),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m8)
+
+res.trc <- nlsResiduals(m8)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+ 
+
+![Month8BootstapPlot](Month8BootstapPlot.png)
+
+### Ninth month
+
+
+m9 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 9),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m9)
+
+res.trc <- nlsResiduals(m9)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+
+
+![Month9BootstapPlot](Month9BootstapPlot.png)
+
+### Tenth month
+
+
+m10 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 10),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m10)
+
+res.trc <- nlsResiduals(m10)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+ 
+
+![Month10BootstapPlot](Month10BootstapPlot.png)
+
+### Eleventh month
+
+
+m11 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 11),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m11)
+
+res.trc <- nlsResiduals(m11)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+
+
+![Month11BootstapPlot](Month11BootstapPlot.png)
+
+### Twelveth month
+
+
+m12 = nls( NEE ~ a * exp(b*TA), night[which(night$MONTH == 12),], start=list(a= trc$a , b= trc$b),
+na.action=na.exclude, trace=F, control=nls.control(warnOnly=T))
+summary(m12)
+
+res.trc <- nlsResiduals(m12)
+par(mfrow=c(2,2))
+plot(res.trc, which=1)# Residulas vs fitted values (Constant Variance) 
+plot(res.trc, which=3) # Standardized residuals
+plot(res.trc, which=4) # Autocorrelation
+plot(res.trc, which=5) # Histogram (Normality)
+
+
+![Month12BootstapPlot](Month12BootstapPlot.png)
+
+
+
+
+
+# How variable are NEE rates over a monthly cycle in Harvard Forest?
+Harvard Forest is a mixed temperate forest. We want to quantify just how variable rates of NEE are monthly. To do this we will fit temperature response curves monthly and compare parameter values.
+
+##Workflow:
+1. Create a dataframe to store month parameter values (parms.Month).
+2. Write a function to the fit model and extract paramters (nee.night).
+3. Write a loop to fit monthly curves and add parameters to a dataframe (parms.Month). 
+4. Bootstrapping for error estimation.
+
 
 ## Create a dataframe to store monthly parameter values (parms.Month):
+
+
 parms.Month <- data.frame(
   MONTH=numeric(),
   a=numeric(),
@@ -90,10 +358,15 @@ parms.Month <- data.frame(
   a.pvalue=numeric(),
   b.pvalue=numeric(), stringsAsFactors=FALSE, row.names=NULL)
 
+#### Creates time file to merge with parm file:
 
-parms.Month[1:12, 1] <- seq(1,12,1) # Creates time file to merge with parm file:
+
+parms.Month[1:12, 1] <- seq(1,12,1) 
+ 
 
 ## Write a function to the fit model and extract parameters (nee.night):
+
+
 nee.night <- function(dataframe){y.df = nls(NEE ~ a * exp(b*TA), 
                                             dataframe, start=list(a= iv$a , b=iv$b ),
                                             na.action=na.exclude, trace=F,
@@ -103,56 +376,98 @@ y.df <- as.data.frame(cbind(t(coef(summary(y.df))[1:2, 1]), t(coef(summary(y.df)
 
 names(y.df) <- c("a", "b", "a.pvalue", "b.pvalue")                      
 return(y.df)}
+ 
 
 ## Write a loop to fit monthly curves and add parameters to a dataframe (parms.Month) (1:12):
+
+
 try(for(j in unique(night$MONTH)){
   print(j)
-  
+ 
+
 ### Determines starting values:
+
+
 iv <- getInitial(NEE ~ SS.trc('TA', "a", "b"), data = night[which(night$MONTH == j),]) 
+ 
   
-### Fits light response curve:
+### Fits temperature response curve:
+
+
 y4 <- try(nee.night(night[which(night$MONTH == j),]), silent=T) # Fit night model
+ 
   
 ### Extracts data and saves it in the dataframe
+
+
   try(parms.Month[c(parms.Month$MONTH == j ), 2:5 ] <- cbind(y4), silent=T)
   
   rm(y4)
 }, silent=T)
 
 parms.Month
+ 
+
+### Creating a table for the parms.Month results
+
+
+library(knitr)
+library(kableExtra)
+library(magick)
+
+kable(parms.Month[1:12, ], format = "html", digits = 1) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+ 
 
 ## Bootstrapping for error estimation
+
 ### Create file to store parms and se
+
+
 boot.NEE <- data.frame(parms.Month[, c("MONTH")]); names (boot.NEE) <- "MONTH"
 boot.NEE$a.est<- 0
 boot.NEE$b.est<- 0
 boot.NEE$a.se<- 0
 boot.NEE$b.se<- 0
+ 
 
 ### Night Model:
+
+
 for ( j in unique(boot.NEE$MONTH)){
   print(j)
   y1 <-night[which(night$MONTH == j),]
+ 
 
 ### Determines the starting values:  
+
+
   iv <- getInitial(NEE ~ SS.trc('TA',"a", "b"), data = y1) 
 
+
 ### Fit curve:  
+
+
   night.fit <- nls(NEE ~ a * exp(b*TA), 
                    data=y1, start=list(a= iv$a , b=iv$b ),
                    na.action=na.exclude, trace=F,
                    control=nls.control(warnOnly=T))
+ 
   
 ### Bootstrap and extract values:
+
+
   try(results <- nlsBoot(night.fit, niter=100 ), silent=T)
   try(a <- t(results$estiboot)[1, 1:2], silent=T)
   try(names(a) <- c('a.est', 'b.est'), silent=T)
   try(b <- t(results$estiboot)[2, 1:2], silent=T)
   try(names(b) <- c('a.se', 'b.se'), silent=T)
   try(c <- t(data.frame(c(a,b))), silent=T)
+ 
 
 ### Add bootstrap data to dataframe:
+
+
   try(boot.NEE[c(boot.NEE$MONTH == j), 2:5] <- c[1, 1:4], silent=T)
   try(rm(night.fit, a, b, c, results, y1), silent=T)
 }
@@ -160,9 +475,138 @@ for ( j in unique(boot.NEE$MONTH)){
 trc <- merge( parms.Month, boot.NEE)
 
 trc
+ 
 
 # Results
 
+![Visual assessment of the model assumptions](SelfStart_ModelAssumptions.png)
+
+The figures above depict the visual assessment of the model assumptions from the Selfstart nonlinear model.
+
+When evaluating the assumptions from the visual assessments we see the following:
+
+Normality: Histogram of the residuals.
+Homogeneous variance: Investigated using a scatter plot between the residual and predicted response variable.
+Residual mean: You want residuals close to zero.
+
+For the figure above and the monthly-made figures as well, the histograms have a normal distribution and the residual means are close to zero.
+
+
+![Summary of the use initial values in the model](Summary of the use initial values in the model.png)
+
+As can be seen, as a result of high autocorrelation, the standard errors of parameter estimates from these models are artificially small, and statistical tests are not valid. Therefore, analysis are presented in a descriptive context.
+
+Finding good starting values is very important to allow the model algorithm to converge. 
+If you set starting parameters values completely outside of the range of potential parameter values the algorithm will either fail or it will return non-sensical parameter estimates. Here we used R’s self-starting models.
+
+The initial values found with the Selfstart were:
+
+$a
+[1] 1.451937
+
+$b
+[1] 0.043954
+
+
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:right;"> MONTH </th>
+   <th style="text-align:right;"> a </th>
+   <th style="text-align:right;"> b </th>
+   <th style="text-align:right;"> a.pvalue </th>
+   <th style="text-align:right;"> b.pvalue </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 1.282263 </td>
+   <td style="text-align:right;"> 0.0279018 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 1.235765 </td>
+   <td style="text-align:right;"> 0.0313632 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 1.100977 </td>
+   <td style="text-align:right;"> 0.0382211 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 1.270271 </td>
+   <td style="text-align:right;"> 0.0477822 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 1.755597 </td>
+   <td style="text-align:right;"> 0.0571120 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 2.400125 </td>
+   <td style="text-align:right;"> 0.0389880 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 7 </td>
+   <td style="text-align:right;"> 2.005208 </td>
+   <td style="text-align:right;"> 0.0454237 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 8 </td>
+   <td style="text-align:right;"> 4.798788 </td>
+   <td style="text-align:right;"> -0.0142284 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.1053243 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 9 </td>
+   <td style="text-align:right;"> 1.821047 </td>
+   <td style="text-align:right;"> 0.0369579 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 1.679584 </td>
+   <td style="text-align:right;"> 0.0392426 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 11 </td>
+   <td style="text-align:right;"> 1.674095 </td>
+   <td style="text-align:right;"> 0.0533639 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:right;"> 1.641407 </td>
+   <td style="text-align:right;"> 0.0346170 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+</tbody>
+</table>
+
+The table above shows the parms.Month results. As can be seen, as a result of high autocorrelation, the standard errors of parameter estimates from these models are artificially small, and statistical tests are not valid. Therefore, analysis are presented in a descriptive context.
 
 # Discussion
 
