@@ -1,0 +1,352 @@
+---
+title: "Species Distribution"
+author: "Helen"
+date: "1/31/2020"
+output: html_document
+---
+
+# Methods
+
+## Species information ( saguaro, Carnegiea gigantea):
+
+![Carnegiea_gigantea_in_Saguaro_National_Park](Carnegiea_gigantea_in_Saguaro_National_Park.jpg)
+![Carnegiea_gigantea_range_map](Carnegiea_gigantea_range_map.png)
+
+The saguaro Carnegiea gigantea) is an arborescent (tree-like) cactus species in the monotypic genus Carnegiea, which can grow to be over 40 feet (12 m) tall. They have a relatively long lifespan, often over 150 years. 
+
+Saguaros are endemic to the Sonoran Desert and are found only in western Sonora in Mexico and in southern Arizona in the US – although plants are occasionally found in southeastern California. Elevation is a limiting factor to its environment, as the saguaro is sensitive to extended frost or cold temperatures. No wild saguaros are found anywhere in New Mexico, Texas, Colorado, Utah, or Nevada, nor in the high deserts of northern Arizona. The northern limits of their range are the Hualapai Mountains in Arizona.
+
+
+## Statistical Analysis (Bioclim):
+
+### 1. Data and quality control
+
+dir.create(path = "data")
+dir.create(path = "output")
+
+library("sp")
+library("raster")
+library("maptools")
+library("rgdal")
+library("dismo")
+
+##### Download the bioclimatic variable data with the getData function
+bioclim.data <- getData(name = "worldclim",
+                        var = "bio",
+                        res = 2.5,
+                        path = "data/")
+
+##### Read in saguaro observations                        
+obs.data <- read.csv(file = "/Users/helen/Documents/EcologyRWorkshop/Time_Series_Analysis/Github/Species Distribution Models/Quantitative-Ecology/data/SDM_Data.csv")
+
+##### Notice NAs - drop them before proceeding
+obs.data <- na.omit(obs.data)
+obs.data <- obs.data[!is.na(obs.data$latitude), ]
+
+##### Make sure those NA's went away
+summary(obs.data)
+
+kable(summary(obs.data) , format = "html", digits = 1) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:left;">   longitude </th>
+   <th style="text-align:left;">    latitude </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Min.   :-114.0 </td>
+   <td style="text-align:left;"> Min.   :26.78 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> 1st Qu.:-111.4 </td>
+   <td style="text-align:left;"> 1st Qu.:32.17 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Median :-111.1 </td>
+   <td style="text-align:left;"> Median :32.28 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Mean   :-111.3 </td>
+   <td style="text-align:left;"> Mean   :32.16 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> 3rd Qu.:-111.0 </td>
+   <td style="text-align:left;"> 3rd Qu.:32.38 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Max.   :-109.3 </td>
+   <td style="text-align:left;"> Max.   :34.80 </td>
+  </tr>
+</tbody>
+</table>
+
+##### Determine geographic extent of our data
+max.lat <- ceiling(max(obs.data$latitude))
+min.lat <- floor(min(obs.data$latitude))
+max.lon <- ceiling(max(obs.data$longitude))
+min.lon <- floor(min(obs.data$longitude))
+geographic.extent <- extent(x = c(min.lon, max.lon, min.lat, max.lat))
+
+##### Load the data to use for our base map
+data(wrld_simpl)
+
+##### Plot the base map
+plot(wrld_simpl, 
+     xlim = c(min.lon, max.lon),
+     ylim = c(min.lat, max.lat),
+     axes = TRUE, 
+     col = "grey95")
+
+##### Add the points for individual observation
+points(x = obs.data$longitude, 
+       y = obs.data$latitude, 
+       col = "olivedrab", 
+       pch = 20, 
+       cex = 0.75)
+box()
+
+![Species Geographical Distribution](Species Geographical Distribution.png)
+
+### 2. Building a model and visualizing results
+
+##### Crop bioclim data to geographic extent of saguaro
+bioclim.data <- crop(x = bioclim.data, y = geographic.extent)
+
+##### Drop unused column
+obs.data <- obs.data[, c("latitude", "longitude")]
+
+##### Reverse order of columns
+obs.data <- obs.data[, c("longitude", "latitude")]
+
+##### Build species distribution model
+bc.model <- bioclim(x = bioclim.data, p = obs.data)
+
+##### Predict presence from model
+predict.presence <- dismo::predict(object = bc.model, x = bioclim.data, ext = geographic.extent)
+
+##### Plot base map
+plot(wrld_simpl, 
+     xlim = c(min.lon, max.lon),
+     ylim = c(min.lat, max.lat),
+     axes = TRUE, 
+     col = "grey95")
+
+##### Add model probabilities
+plot(predict.presence, add = TRUE)
+
+##### Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+
+##### Add original observations
+points(obs.data$longitude, obs.data$latitude, col = "olivedrab", pch = 20, cex = 0.75)
+box()
+
+![Bioclimatic_model_of_SW_Saguaro](Bioclimatic_model_of_SW_Saguaro.png)
+
+### 3. The pseudo-absence point
+
+##### Use the bioclim data files for sampling resolution
+bil.files <- list.files(path = "data/wc2-5", 
+                          pattern = "*.bil$", 
+                          full.names = TRUE)
+
+##### We only need one file, so use the first one in the list of .bil files
+mask <- raster(bil.files[1])
+
+##### Randomly sample points (same number as our observed points)
+background <- randomPoints(mask = mask,     # Provides resolution of sampling points
+                   n = nrow(obs.data),      # Number of random points
+                   ext = geographic.extent, # Spatially restricts sampling
+                   extf = 1.25)             # Expands sampling a little bit
+head(background)
+
+kable(head(background) , format = "html", digits = 1) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:right;"> x </th>
+   <th style="text-align:right;"> y </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> -112.1 </td>
+   <td style="text-align:right;"> 35.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -113.1 </td>
+   <td style="text-align:right;"> 34.3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -111.3 </td>
+   <td style="text-align:right;"> 32.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -110.6 </td>
+   <td style="text-align:right;"> 33.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -108.3 </td>
+   <td style="text-align:right;"> 27.9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -110.8 </td>
+   <td style="text-align:right;"> 32.1 </td>
+  </tr>
+</tbody>
+</table>
+
+##### Plot the base map
+plot(wrld_simpl, 
+     xlim = c(min.lon, max.lon),
+     ylim = c(min.lat, max.lat),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Presence and pseudo-absence points")
+
+##### Add the background points
+points(background, col = "grey30", pch = 1, cex = 0.75)
+
+##### Add the observations
+points(x = obs.data$longitude, 
+       y = obs.data$latitude, 
+       col = "olivedrab", 
+       pch = 20, 
+       cex = 0.75)
+
+box()
+
+![Presence and pseudo-absence points](Presence and pseudo-absence points.png)
+
+##### Arbitrarily assign group 1 as the testing data group
+testing.group <- 1
+
+##### Create vector of group memberships
+group.presence <- kfold(x = obs.data, k = 5) # kfold is in dismo package
+
+head(group.presence)
+
+table(group.presence)
+
+##### Separate observations into training and testing groups
+presence.train <- obs.data[group.presence != testing.group, ]
+presence.test <- obs.data[group.presence == testing.group, ]
+
+##### Repeat the process for pseudo-absence points
+group.background <- kfold(x = background, k = 5)
+background.train <- background[group.background != testing.group, ]
+background.test <- background[group.background == testing.group, ]
+
+### 4. Training and testing the model
+
+##### Build a model using training data
+bc.model <- bioclim(x = bioclim.data, p = presence.train)
+
+##### Predict presence from model (same as previously, but with the update model)
+predict.presence <- dismo::predict(object = bc.model, 
+                                   x = bioclim.data, 
+                                   ext = geographic.extent)
+##### Use testing data for model evaluation
+bc.eval <- evaluate(p = presence.test,   # The presence testing data
+                    a = background.test, # The absence testing data
+                    model = bc.model,    # The model we are evaluating
+                    x = bioclim.data)    # Climatic variables for use by model
+
+##### Determine minimum threshold for "presence"
+bc.threshold <- threshold(x = bc.eval, stat = "spec_sens")
+predict.presence > bc.threshold
+
+class      : RasterLayer 
+dimensions : 216, 144, 31104  (nrow, ncol, ncell)
+resolution : 0.04166667, 0.04166667  (x, y)
+extent     : -115, -109, 26, 35  (xmin, xmax, ymin, ymax)
+crs        : +proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0 
+source     : memory
+names      : layer 
+values     : 0, 1  (min, max)
+
+##### Plot base map
+plot(wrld_simpl, 
+     xlim = c(min.lon, max.lon),
+     ylim = c(min.lat, max.lat),
+     axes = TRUE, 
+     col = "grey95")
+
+##### Only plot areas where probability of occurrence is greater than the threshold
+plot(predict.presence > bc.threshold, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "olivedrab"))
+
+##### And add those observations
+points(x = obs.data$longitude, 
+       y = obs.data$latitude, 
+       col = "black",
+       pch = "+", 
+       cex = 0.75)
+
+##### Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+![landscape suitability](landscape suitability.png)
+
+## Results
+
+kable(head(background) , format = "html", digits = 1) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:right;"> x </th>
+   <th style="text-align:right;"> y </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> -112.1 </td>
+   <td style="text-align:right;"> 35.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -113.1 </td>
+   <td style="text-align:right;"> 34.3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -111.3 </td>
+   <td style="text-align:right;"> 32.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -110.6 </td>
+   <td style="text-align:right;"> 33.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -108.3 </td>
+   <td style="text-align:right;"> 27.9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> -110.8 </td>
+   <td style="text-align:right;"> 32.1 </td>
+  </tr>
+</tbody>
+</table>
+
+
+![landscape suitability](landscape suitability.png)
+
+## Discussion
+
+Species distribution modeling is a tool used to understand how organisms might respond to current and future environmental changes, it helps model the conditions in which a species is expected to occur. Here we worked with are observations of the saguaro, Carnegiea gigantea. By cross referencing variables such as how widely our species is geographically distributed, the probability of occurrence of saguaros across the map, and the absence points, where saguaros are known to not occur, we were able to show where saguaros are found across the Sonoran Desert. The data generated is similar to previously made maps of the saguaro's natural range. By using 19 abiotic variables and bioclimatic variable data, we were able to create the predict species ranges with climate data as predictors.
