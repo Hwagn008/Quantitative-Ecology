@@ -15,3 +15,13 @@ Subsequent generations of field-collected mosquito lines and Orlando control wer
 
 Results:
 
+![Initial Visualization](VisualizeFP.jpeg)
+Graph1: Orlando female non-gravid mosquito locomotor activity throughout the period of four days. The average counts were collected every ten minutes. The time period has been set to encompass a full 24 hour day.
+
+![Identifying and Replacing Outliers](RemoveOutliersFP.jpeg)
+Graph2: Removal of any outliers from Graph1 (Orlando time series) that could bias the model by skewing statistical summaries.
+
+![Decomposition of Multiplicative Time Series](DECOMPfp.png)
+Graph3: This deconstruction of the time series of Graph1 (Orlando time series) separates the time series into the seasonal, trend and irregular components. The Seasonal component refers to fluctuations in the data related to daily Light:Dark cycles. Trend component is the overall pattern of the series. It consists of decreasing or increasing patterns that are not seasonal. This is estimated using moving averages.The part of the series that can’t be attributed to the seasonal or trend components is referred to as residual or error.
+
+
