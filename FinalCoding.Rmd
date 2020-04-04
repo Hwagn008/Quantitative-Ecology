@@ -17,38 +17,53 @@ par(mfrow=c(1,1), mai=c(0.8,0.8,0.8, 0.8))
 plot( ave, typ="l", ylab= "Average counts", xlab="Time Period") 
 plot(ave)
 lines(tsclean(ave), col="red") 
-nee <- tsclean(ave) 
+ave <- tsclean(ave) 
+ave.d <- decompose(ave, 'multiplicative') 
+plot(ave.d)
 adf.test(ave ) 
+adf.test(diff(ave))
+kpss.test(ave, null = c("L"), lshort = TRUE)
+
+Diff <- ave - lag(ave)
+diff(ave, lag = 144, differences = 1)
+
+adf.test(Diff)
+
+Diff2 <- Diff - lag(Diff)
+diff(ave, differences = 2)
+
+adf.test(Diff2)
+
+arima.Diff2 <-auto.arima(Diff2, trace=TRUE)
+tsdisplay(residuals(arima.Diff2), lag.max=45)
+
+arima.Diff2B <-arima(Diff2 , order=c(10,0,0))
+tsdisplay(residuals(arima.Diff2B), lag.max= 30)
+
+arima.Diff2C <-arima(Diff2 , order=c(12,0,0))
+tsdisplay(residuals(arima.Diff2C), lag.max= 30)
+
+arima.Diff2D <-arima(Diff2 , order=c(14,0,0))
+tsdisplay(residuals(arima.Diff2D), lag.max=144)
+
+arima.Diff2E <-arima(Diff2 , order=c(14,0,0))
+tsdisplay(residuals(arima.Diff2E), lag.max=140)
+
+AIC(arima.Diff2, arima.Diff2B, arima.Diff2C, arima.Diff2D, arima.Diff2E)
+
+par(mfrow=c(1,1))
+plot(Diff2 , typ="l"); lines(fitted(arima.Diff2D),col="red")
+checkresiduals(arima.Diff2D, lag=36)
+plot(forecast(arima.Diff2D, h=72))
+
 acf(nee, lag.max=45)
 pacf(nee, lag.max=45)
 
-
+Inverse <- diffinv(Diff, lag = 1, differences=1, xi = 1)
 > nee <- ts( FINALDATA$A1.5...2, start= 1, frequency=144)
 > par(mfrow=c(1,1), mai=c(0.25,0.8,0.1, 0.1)) 
 > plot( nee, typ="l", ylab= "NEE", xlab="")
 file.choose()
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

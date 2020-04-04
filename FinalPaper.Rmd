@@ -25,3 +25,24 @@ Graph2: Removal of any outliers from Graph1 (Orlando time series) that could bia
 Graph3: This deconstruction of the time series of Graph1 (Orlando time series) separates the time series into the seasonal, trend and irregular components. The Seasonal component refers to fluctuations in the data related to daily Light:Dark cycles. Trend component is the overall pattern of the series. It consists of decreasing or increasing patterns that are not seasonal. This is estimated using moving averages.The part of the series that can’t be attributed to the seasonal or trend components is referred to as residual or error.
 
 
+![Augmented Dickey-Fuller Test](ADFinal.png)
+The augmented Dickey-Fuller (ADF) was used as a formal statistical test for stationarity. The null hypothesis assumes that the series is non-stationary. ADF procedure tests whether the change in Y can be explained by lagged value and a linear trend. Here, he lagged value to the change in Y is non-significant and there is a presence of a trend component, the series is non-stationary and null hypothesis will not be rejected. This means that statistical properties such as the mean, variance and autocorrelation are not constant over time. Because of this, a differenced the time series was also tested with ADF for the differenced time series had a p-value of 0.01.  the Kwiatkowski-Phillips-Schmidt-Shin (KPSS) test was also used to identify trend-stationarity in the series, but with a p-value of 0.01, we reject the null hypothesis, series is not stationary. There were multiple steps of differencing taken. First-differencing the time series removed the linear trend (i.e., differences=1); twice-differencing removed the quadratic trend (i.e., differences=2). In addition, when first-differencing the time series at a lag equal to the period, it removed a seasonal trend (e.g., set lag=144 for daily collected data).
+
+![Residuals](ResidualsFP.png)
+Graph4: Residuals plots show a smaller error range, more or less centered around 0. There is a clear pattern present in ACF/PACF and model residuals plots repeating at lag 10. This suggests that our model may be better off with a different specification, such as p = 10 or q = 10.
+
+![Adjusted Residuals](AdjustResiduals.png)
+Graph5: After increasing the lag max to 140, the best model with the lowest AIC produced.
+
+![ResidualsARIMA](ResidualsARIMA.png)
+Graph6: The Ljung-Box test of independence at all lags up to the one specified was conducted. Testing the “overall” randomness based on a number of lags as a portmanteau test, that the residuals from the ARIMA model have no autocorrelation. In this case the p-value was 0.3458, confirming no significant difference from white noise.
+
+![tTemporal dynamics](TempDynFP.png)
+Graph7: Temporal dynamics of the differenced data set for Orlando female locomotor activity.
+
+![Potential forecast](Forecast.png)
+Graph8: Potential forecast of temporal dynamics for Orlando female mosquitoes over the course of the next time period using the ARIMA model.
+
+Discussion:
+
+Unfortunately, due to laboratory constraints on data production, only Orlando female mosquitoes were able to be run and analyzed for the purposes of this study. The study however still elucidated varying components of this time series. For example, there seems to be a trend of increase activity from the second to the third day in mosquitoes within the LAM monitor. This was an issue for the ARIMA model, and steps were taken to ensure the trends would be removed for the model to be fitted into the data set. There also visually seems to be a seasonal trend shown in the decomposition possibly due to the specie's diurnal circadian rhythm for host-seeking, mating and oviposition activities. It was only after multiple steps of differencing taken that a forecast was achieved as an end product. This suggests there are many factors coming into play in mosquito locomotor activity or that an insufficient amount of data was collected for this purpose. It is possible in the future to conduct LAM trials for longer than the 3 day period. It seems that there may also have been many outliers still influencing the graph trends. This may be reduced by more rigorously removing outliers previous to importing data, or by increasing sample size and determining if the outliers may just be the peaks of activity. More analysis has to be done on field samples and a comparison of decomposed data may allow for a better view at possible differences between these mosquito populations.
