@@ -371,6 +371,9 @@ summary {
 
 <div id="introduction" class="section level1">
 <h1>Introduction:</h1>
+<style>
+        p {line-height: 3.5em;}
+    </style>
 <p>An endogenous circadian clock can interact with a light-dark cycle to determine the behavioral rhythm expression at the physiological, molecular, and behavioral levels. In mosquitoes, there exist multiple chronobiology studies where circadian phenotypes have been shown to influence activities like sugar feeding, blood feeding, oviposition, and locomotor activity (Edman 1977; Meireles-Filho &amp; Kyriacou et al. 2013; Gatton et al. 2013 ). The detoxification of oxidative stress is another process that has been found in Ae. aegypti to be regulated by the circadian clock, and this process is often caused by insecticide usage, like the use of pyrethroids (Yang et al. 2010). The association in Ae. aegypti made between the CYP9M9 detoxification gene and the clock gene period moreover show elevated expression during the dusk period, where there is typically increased activity, host-seeking, and oviposition (Yang et al. 2010). Pyrethroids are relevant due to the local application of this insecticide by Miami-Dade County (Miami Dade Mosquito Control). Although morphological and physiological resistance pathways such as metabolic resistance, target site modifications, and cuticle thickness are typically studied (Vontas et al. 2012), understanding possible behavioral resistance, like a circadian-regulated behavioral phenotype in this organism, has not yet been well-studied. Behavioral resistance has been defined as a modification of vector behavior that allows for insecticide avoidance, allowing a mosquito to escape without harm (Carrasco et al. 2019). This study will compare the locomotor activity of second-generation wild-caught Ae. aegypti mosquitoes with that of a susceptible laboratory strain of Ae. aegypti, “Orlando”. This strain was chosen as reference to what the mosquito’s conserved circadian rhythm would look like since it is not insecticide resistant and has not been exposed to any insecticide chemicals that may affect behavior since its laboratory establishment (Kuno 2010).</p>
 </div>
 <div id="methods" class="section level1">
@@ -420,6 +423,16 @@ summary {
 <div id="discussion" class="section level1">
 <h1>Discussion:</h1>
 <p>Unfortunately, due to laboratory constraints on data production, only Orlando female mosquitoes were able to be run and analyzed for the purposes of this study. The study however still elucidated varying components of this time series. For example, there seems to be a trend of increase activity from the second to the third day in mosquitoes within the LAM monitor. This was an issue for the ARIMA model, and steps were taken to ensure the trends would be removed for the model to be fitted into the data set. There also visually seems to be a seasonal trend shown in the decomposition possibly due to the specie’s diurnal circadian rhythm for host-seeking, mating and oviposition activities. It was only after multiple steps of differencing taken that a forecast was achieved as an end product. This suggests there are many factors coming into play in mosquito locomotor activity or that an insufficient amount of data was collected for this purpose. It is possible in the future to conduct LAM trials for longer than the 3 day period. It seems that there may also have been many outliers still influencing the graph trends. This may be reduced by more rigorously removing outliers previous to importing data, or by increasing sample size and determining if the outliers may just be the peaks of activity. More analysis has to be done on field samples and a comparison of decomposed data may allow for a better view at possible differences between these mosquito populations.</p>
+</div>
+<div id="references" class="section level1">
+<h1>References:</h1>
+<p>Carrasco D, Lefèeye T, Moiroux N et al. 2019. Behavioural adaptations of mosquito vectors to insecticide control. Current Opinion in Insect Science 34: 48-54. doi: 10.1016/j.cois.2019.03.005</p>
+<p>Edman JD, Haeger JS. 1977. Host-feeding patterns of Florida mosquitoes Journal of Medical Entomology 14: 477–479. doi: 10.1093/jmedent/14.4.477</p>
+<p>Gatton ML, Chitnis N, Churcher T et al. 2013. The Importance Of mosquito behavioural adaptations to malaria control in Africa. Evolution, 67: 1218–1230. doi: 10.1111/evo.12063</p>
+<p>Kuno G. 2010. Early history of laboratory breeding of Aedes aegypti (Diptera: Culicidae) focusing on the origins and use of selected strains. Journal of Medical Entomology, 47: 957–971. doi: 10.1603/me10152</p>
+<p>Muirhead-Thomson RC. (1960). The significance of irritability, behaviouristic avoidance and allied phenomena in malaria eradication. Bull. Wid Hith Org.</p>
+<p>Vontas J, Kioulos E, Pavlidi N, Mo, et al. 2012. Insecticide resistance in the major dengue vectors Aedes albopictus and Aedes aegypti. Pesticide Biochemistry and Physiology, 104: 126–131. <a href="doi:10.1016/j.pestbp.2012.05.008" class="uri">doi:10.1016/j.pestbp.2012.05.008</a></p>
+<p>Yang Y-Y, Liu Y, Teng H-J, et al. 2010. Circadian control of permethrin-resistance in the mosquito Aedes aegypti. Journal of Insect Physiology, 56: 1219–1223. doi: 10.1016/j.jinsphys.2010.03.028</p>
 </div>
 
 
